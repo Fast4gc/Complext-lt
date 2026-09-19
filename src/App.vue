@@ -9,6 +9,7 @@ import ScrollStory from './components/ScrollStory.vue'
 gsap.registerPlugin(ScrollTrigger)
 
 const headerRef = ref(null)
+const heroNameRef = ref(null)
 const heroTitleRef = ref(null)
 const heroSubtitleRef = ref(null)
 const heroBtnRef = ref(null)
@@ -52,15 +53,26 @@ onMounted(async () => {
       }
     })
 
-    // Hero entrance: text first, visual after — no overlap
+    // Hero entrance: star + project name first, then tagline + CTAs
     const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } })
     heroTl
-      .from(heroTitleRef.value, { y: 50, opacity: 0, duration: 1.1 })
+      .from('.hero-eyebrow', { y: 20, opacity: 0, duration: 0.7 })
+      .from('.hero-star-scale', { scale: 0.5, opacity: 0, duration: 1.4, ease: 'back.out(1.4)' }, '-=0.4')
+      .from(heroNameRef.value, { y: 80, opacity: 0, duration: 1.1 }, '-=1.0')
+      .from(heroTitleRef.value, { y: 36, opacity: 0, duration: 0.9 }, '-=0.7')
       .from(heroSubtitleRef.value, { y: 24, opacity: 0, duration: 0.8 }, '-=0.6')
-      .from(heroBtnRef.value, { y: 16, opacity: 0, scale: 0.97, duration: 0.6 }, '-=0.4')
-      .from('.hero-visual', { y: 60, opacity: 0, duration: 1.1 }, '-=0.5')
-      .from('.hero-centerpiece', { scale: 0.7, opacity: 0, duration: 1.0, ease: 'back.out(1.5)' }, '-=0.9')
-      .from('.hero-side', { opacity: 0, x: (i) => (i === 0 ? -40 : 40), duration: 1.0, stagger: 0.1 }, '-=0.9')
+      .from(heroBtnRef.value, { y: 16, opacity: 0, scale: 0.97, duration: 0.6 }, '-=0.5')
+      .from('.hero-side', { opacity: 0, x: (i) => (i === 0 ? -40 : 40), duration: 1.0, stagger: 0.1 }, '-=0.8')
+      .from('.scroll-hint', { opacity: 0, duration: 0.8 }, '-=0.4')
+
+    // Hero scroll: star zooms + spins away, name gradient sweeps, content parallaxes
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom 40%', scrub: 1 },
+    })
+      .to('.hero-star-scale', { scale: 1.7, rotation: 100, opacity: 0.15 }, 0)
+      .to(heroNameRef.value, { backgroundPosition: '50% 100%' }, 0)
+      .to('.hero-content-inner', { y: -90 }, 0)
 
     // Feature cards: use toArray (no ref-collection bugs), play once
     gsap.utils.toArray('.feature-card').forEach((el, i) => {
@@ -153,59 +165,72 @@ onBeforeUnmount(() => {
     </header>
 
     <main>
-      <!-- HERO: text on top, visual below (no overlap) -->
+      <!-- HERO: fused — 3D star + project name spotlight -->
       <section id="hero" ref="heroSectionRef" class="hero">
-        <div class="hero-content">
-          <h1 ref="heroTitleRef" class="hero-title">
+        <div class="hero-glow-main" aria-hidden="true"></div>
+        <div class="hero-side hero-side--left" aria-hidden="true"></div>
+        <div class="hero-side hero-side--right" aria-hidden="true"></div>
+
+        <div class="hero-content-inner">
+          <p class="hero-eyebrow">Complext Studio — automation flow</p>
+
+          <div class="hero-stage">
+            <div class="hero-star-spin" aria-hidden="true">
+              <div class="hero-star-scale">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="hero-star-rim" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#e0f2ff"/>
+                      <stop offset="35%" stop-color="#7c5cff"/>
+                      <stop offset="65%" stop-color="#4f46e5"/>
+                      <stop offset="100%" stop-color="#c026d3"/>
+                    </linearGradient>
+                    <radialGradient id="hero-star-fill" cx="50%" cy="45%" r="65%">
+                      <stop offset="0%" stop-color="#1b1040"/>
+                      <stop offset="70%" stop-color="#0a0618"/>
+                      <stop offset="100%" stop-color="#050310"/>
+                    </radialGradient>
+                    <filter id="hero-star-blur" x="-40%" y="-40%" width="180%" height="180%">
+                      <feGaussianBlur stdDeviation="7" result="b"/>
+                      <feMerge>
+                        <feMergeNode in="b"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  <g filter="url(#hero-star-blur)">
+                    <path
+                      d="M100 2 C102 60 140 98 198 100 C140 102 102 140 100 198 C98 140 60 102 2 100 C60 98 98 60 100 2 Z"
+                      fill="url(#hero-star-fill)" stroke="url(#hero-star-rim)" stroke-width="2.5"/>
+                    <path
+                      d="M100 22 C101 66 134 99 178 100 C134 101 101 134 100 178 C99 134 66 101 22 100 C66 99 99 66 100 22 Z"
+                      fill="white" opacity="0.06"/>
+                    <line x1="100" y1="0" x2="100" y2="34" stroke="white" stroke-width="1.4" opacity="0.7"/>
+                    <line x1="100" y1="166" x2="100" y2="200" stroke="white" stroke-width="1" opacity="0.3"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <h1 ref="heroNameRef" class="hero-name">COMPLEXT</h1>
+          </div>
+
+          <h2 ref="heroTitleRef" class="hero-tagline">
             When intelligence reaches out to instinct, the future takes shape
-          </h1>
+          </h2>
           <p ref="heroSubtitleRef" class="hero-subtitle">
             an unlikely alliance — where human intuition and algorithmic precision move as one
           </p>
           <div ref="heroBtnRef" class="hero-actions">
-            <a href="keys" class="btn-cta">
+            <a href="keys" class="btn-cta btn-solid">
               See it in action
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <line x1="3" y1="8" x2="13" y2="8"/>
                 <polyline points="9,4 13,8 9,12"/>
               </svg>
             </a>
-          </div>
-        </div>
-
-        <div class="hero-visual">
-          <div class="hero-side hero-side--left" aria-hidden="true"></div>
-          <div class="hero-side hero-side--right" aria-hidden="true"></div>
-          <div class="hero-glow" aria-hidden="true"></div>
-          <div class="hero-centerpiece" aria-hidden="true">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="crystal-grad" x1="50%" y1="0%" x2="50%" y2="100%">
-                  <stop offset="0%" stop-color="#c084fc"/>
-                  <stop offset="55%" stop-color="#a855f7"/>
-                  <stop offset="100%" stop-color="#7c3aed"/>
-                </linearGradient>
-                <filter id="crystal-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="6" result="blur"/>
-                  <feMerge>
-                    <feMergeNode in="blur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-              <g filter="url(#crystal-glow)">
-                <path d="M100 30 L122 78 L100 170 L78 78 Z" fill="url(#crystal-grad)" opacity="0.95"/>
-                <path d="M100 30 L150 78 L100 170 L50 78 Z" fill="url(#crystal-grad)" opacity="0.35"/>
-                <path d="M82 62 L118 62 L112 74 L88 74 Z" fill="white" opacity="0.18"/>
-                <line x1="100" y1="30" x2="100" y2="170" stroke="white" stroke-width="0.6" opacity="0.35"/>
-              </g>
-            </svg>
-          </div>
-          <div class="hero-icons" aria-hidden="true">
-            <span class="hero-icon"><font-awesome-icon icon="key" /></span>
-            <span class="hero-icon"><font-awesome-icon icon="code" /></span>
-            <span class="hero-icon"><font-awesome-icon icon="star" /></span>
-            <span class="hero-icon"><font-awesome-icon icon="rocket" /></span>
+            <a href="#story" class="btn-cta">
+              Explore the story
+            </a>
           </div>
         </div>
 
@@ -318,27 +343,83 @@ onBeforeUnmount(() => {
 }
 .header-cta:hover { transform: scale(1.04); box-shadow: 0 4px 20px rgba(255,255,255,0.15); }
 
-/* Hero */
+/* Hero — fused: 3D star + project name spotlight */
 .hero {
   position: relative; z-index: 1;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
+  align-items: center; justify-content: center;
   overflow: hidden;
-  padding: 150px 24px 60px;
+  padding: 130px 24px 70px;
 }
-.hero-content { position: relative; z-index: 3; text-align: center; max-width: 760px; }
-.hero-title {
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
-  font-weight: 700; line-height: 1.15; letter-spacing: -0.03em;
-  color: #fff; margin: 0 0 24px;
+.hero-glow-main {
+  position: absolute; top: 4%; left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 880px); height: min(72vh, 560px);
+  background:
+    radial-gradient(50% 55% at 50% 42%, rgba(124,58,237,0.20), transparent 70%),
+    radial-gradient(30% 35% at 68% 62%, rgba(59,130,246,0.12), transparent 70%),
+    radial-gradient(28% 32% at 30% 60%, rgba(217,70,239,0.10), transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+.hero-content-inner { position: relative; z-index: 3; text-align: center; max-width: 920px; }
+.hero-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 8px 18px;
+  margin: 0 0 18px;
+  background: rgba(255,255,255,0.03);
+}
+.hero-stage {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: clamp(240px, 44vh, 430px);
+  margin: 6px 0 2px;
+}
+.hero-star-spin {
+  position: absolute; top: 50%; left: 50%;
+  width: min(60vh, 500px); height: min(60vh, 500px);
+  transform: translate(-50%, -50%);
+  animation: hero-spin 46s linear infinite;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 46px rgba(124,58,237,0.45));
+}
+@keyframes hero-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.hero-star-scale { width: 100%; height: 100%; }
+.hero-star-scale svg { width: 100%; height: 100%; overflow: visible; }
+.hero-name {
+  position: relative; z-index: 2;
+  margin: 0;
+  font-weight: 900; letter-spacing: -0.04em; line-height: 0.95;
+  font-size: clamp(3.4rem, 13vw, 11rem);
+  color: transparent;
+  background-image: linear-gradient(to bottom,
+    #ffffff 0%, #ffffff 36%,
+    #c4b5fd 45%, #a855f7 52%,
+    #ffffff 60%, #ffffff 100%);
+  background-size: 100% 220%;
+  background-position: 50% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 6px 40px rgba(168,85,247,0.35));
+}
+.hero-tagline {
+  font-size: clamp(1.15rem, 2.6vw, 1.7rem);
+  font-weight: 600; line-height: 1.3; letter-spacing: -0.02em;
+  color: #fff;
+  max-width: 660px;
+  margin: 26px auto 14px;
 }
 .hero-subtitle {
-  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
   color: rgba(255,255,255,0.45); line-height: 1.6;
-  margin: 0 auto 40px; max-width: 520px;
+  margin: 0 auto 38px; max-width: 520px;
 }
-.hero-actions { display: flex; justify-content: center; }
+.hero-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
 .btn-cta {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 14px 28px; border-radius: 100px;
@@ -348,32 +429,8 @@ onBeforeUnmount(() => {
   transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
 }
 .btn-cta:hover { border-color: #fff; background: rgba(255,255,255,0.06); transform: scale(1.04); }
-
-/* Visual block BELOW text — never overlaps */
-.hero-visual {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 1100px;
-  height: 420px; margin-top: 40px;
-  display: flex; align-items: center; justify-content: center;
-}
-.hero-glow {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 420px; height: 420px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(168,85,247,0.22) 0%, transparent 70%);
-  filter: blur(60px); pointer-events: none;
-  animation: glow-pulse 4s ease-in-out infinite;
-}
-@keyframes glow-pulse {
-  0%,100% { opacity: 0.6; transform: translate(-50%,-50%) scale(1); }
-  50% { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
-}
-.hero-centerpiece { position: relative; z-index: 2; width: 150px; height: 150px; animation: centerpiece-float 6s ease-in-out infinite; }
-.hero-centerpiece svg { width: 100%; height: 100%; overflow: visible; }
-@keyframes centerpiece-float {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
+.btn-solid { background: #fff; color: #000; border-color: #fff; }
+.btn-solid:hover { background: #f0f0f0; box-shadow: 0 4px 24px rgba(255,255,255,0.18); }
 
 /* Halftone dot texture (CSS — no scribble SVGs) */
 .hero-side {
@@ -395,14 +452,6 @@ onBeforeUnmount(() => {
   mask-image: radial-gradient(ellipse 90% 80% at 80% 50%, black 20%, transparent 70%);
   opacity: 0.5;
 }
-.hero-icons { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 26px; z-index: 2; }
-.hero-icon {
-  width: 34px; height: 34px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.28); font-size: 0.95rem;
-  border: 1px dashed rgba(255,255,255,0.12);
-}
-
 .scroll-hint { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); }
 .scroll-hint-line {
   width: 1px; height: 44px;
@@ -497,9 +546,9 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .features-grid { grid-template-columns: 1fr; }
-  .hero-visual { height: 320px; }
   .hero-side { display: none; }
-  .hero-centerpiece { width: 120px; height: 120px; }
+  .hero-star-spin { width: min(70vw, 340px); height: min(70vw, 340px); }
+  .hero-stage { min-height: 300px; }
   .about-inner { justify-content: flex-start; }
   .about-copy { max-width: 100%; padding-top: 120px; }
   .about-blob { left: -30%; width: 110vw; opacity: 0.7; }
@@ -510,6 +559,6 @@ onBeforeUnmount(() => {
   .header-nav { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-centerpiece, .hero-glow, .scroll-hint-line { animation: none !important; }
+  .hero-star-spin, .scroll-hint-line { animation: none !important; }
 }
 </style>
