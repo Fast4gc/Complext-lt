@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import ThreeBackground from './components/ThreeBackground.vue'
 import ScrollStory from './components/ScrollStory.vue'
+import StarSky from './components/StarSky.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -198,6 +199,7 @@ onBeforeUnmount(() => motion?.revert())
     <main>
       <!-- HERO: fused — 3D star + project name spotlight -->
       <section id="hero" ref="heroSectionRef" class="hero">
+        <StarSky />
         <div class="hero-glow-main" aria-hidden="true"></div>
         <div class="hero-side hero-side--left" aria-hidden="true"></div>
         <div class="hero-side hero-side--right" aria-hidden="true"></div>

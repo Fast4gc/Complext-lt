@@ -3,6 +3,7 @@
     <div ref="pinRef" class="scrollstory-pin">
       <!-- ACT 1 — 3D star (Image 1) -->
       <div ref="act1Ref" class="act act--dark">
+        <StarSky :active="skyActive" />
         <p class="act-kicker">01 — Signal</p>
         <div ref="starRef" class="star">
           <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -67,10 +68,12 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import StarSky from './StarSky.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const rootRef = ref(null)
+const skyActive = ref(true)
 const pinRef = ref(null)
 const act1Ref = ref(null)
 const act2Ref = ref(null)
@@ -100,6 +103,7 @@ onMounted(() => {
           anticipatePin: 1,
           onUpdate: (self) => {
             const p = self.progress
+            skyActive.value = p < 0.55
             tick1Ref.value?.classList.toggle('is-active', p < 0.4)
             tick2Ref.value?.classList.toggle('is-active', p >= 0.4 && p < 0.8)
             tick3Ref.value?.classList.toggle('is-active', p >= 0.8)
@@ -133,6 +137,7 @@ onMounted(() => {
 
     // Mobile / reduced motion: static stacked panels, no pin
     mm.add('(max-width: 768px), (prefers-reduced-motion: reduce)', () => {
+      skyActive.value = true
       gsap.set([act1Ref.value, act2Ref.value], { clearProps: 'all', opacity: 1 })
       gsap.set(starRef.value, { clearProps: 'all', opacity: 1 })
       gsap.set(voidRef.value, { clearProps: 'all', opacity: 1 })
@@ -157,6 +162,8 @@ onBeforeUnmount(() => {
 .act { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .act--dark { background: #000; z-index: 1; }
 .act--cream { background: var(--color-cream); z-index: 2; opacity: 0; }
+.act--dark > :not(.star-sky) { z-index: 1; }
+.act-hint { position: relative; }
 
 .act-kicker {
   position: absolute; top: 96px;
