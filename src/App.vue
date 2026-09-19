@@ -10,33 +10,31 @@ gsap.registerPlugin(ScrollTrigger)
 const headerRef = ref(null)
 const heroTitleRef = ref(null)
 const heroSubtitleRef = ref(null)
-const cardsGridRef = ref(null)
+const heroBtnRef = ref(null)
+const featureRefs = ref([])
 const featuresSectionRef = ref(null)
-const featuresRefs = ref([])
 const footerRef = ref(null)
 const heroSectionRef = ref(null)
 const isHeaderVisible = ref(true)
-let ctx
+let ctx, lenis
 
 const setFeatureRef = (el) => {
-  if (el) featuresRefs.value.push(el)
+  if (el && !featureRefs.value.includes(el)) featureRefs.value.push(el)
 }
 
-const heroCards = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  scale: 0.8 + Math.random() * 0.4,
-  y: Math.random() * 100,
-  delay: Math.random() * 2
-}))
+const features = [
+  { title: 'Python Core', desc: 'Robust backend using 3.11+ for intelligent processing.', icon: 'rocket' },
+  { title: 'Vue 3 UI', desc: 'Granular reactivity for a seamless user experience.', icon: 'code' },
+  { title: 'GSAP Motion', desc: 'High-performance animations that guide the eye.', icon: 'star' }
+]
 
 onMounted(() => {
   ctx = gsap.context(() => {
-    const lenis = new Lenis({
+    lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     })
-    lenisRef = lenis
 
     function raf(time) {
       lenis.raf(time)
@@ -48,12 +46,6 @@ onMounted(() => {
     gsap.ticker.add((time) => lenis.raf(time * 1000))
     gsap.ticker.lagSmoothing(0)
 
-    const mm = gsap.matchMedia()
-
-    mm.add('(min-width: 769px)', () => {
-      document.addEventListener('mousemove', onTiltMove)
-    })
-
     ScrollTrigger.create({
       start: 'top top',
       end: 100,
@@ -62,239 +54,452 @@ onMounted(() => {
       }
     })
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-    tl.from('.hero-card', {
-      rotationY: 90,
-      rotationX: 45,
+    heroTl.from(heroTitleRef.value, {
+      y: 60,
       opacity: 0,
-      scale: 0.3,
-      z: -100,
       duration: 1.2,
-      stagger: { amount: 1.2, from: 'center', ease: 'back.out(1.7)' },
-      transformPerspective: 800,
-      transformOrigin: 'center center'
     })
-
-    .from(heroTitleRef.value, {
-      rotationX: 45,
-      y: 80,
-      opacity: 0,
-      filter: 'blur(20px)',
-      duration: 1,
-      transformPerspective: 1000,
-    }, '-=0.8')
-
     .from(heroSubtitleRef.value, {
-      y: 40,
+      y: 30,
       opacity: 0,
-      duration: 0.8,
-      ease: 'power2.out'
-    }, '-=0.5')
+      duration: 0.9,
+    }, '-=0.6')
+    .from(heroBtnRef.value, {
+      y: 20,
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.7,
+    }, '-=0.4')
+    .from('.hero-hand', {
+      opacity: 0,
+      scale: 0.8,
+      duration: 1.5,
+      stagger: 0.1,
+    }, '-=1.2')
+    .from('.hero-centerpiece', {
+      scale: 0.5,
+      opacity: 0,
+      rotation: -20,
+      duration: 1.4,
+      ease: 'back.out(1.4)',
+    }, '-=1.5')
+    .from('.hero-glow', {
+      scale: 0.3,
+      opacity: 0,
+      duration: 1.2,
+    }, '-=1.2')
 
-    gsap.to(cardsGridRef.value, {
-      scrollTrigger: {
-        trigger: heroSectionRef.value,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1
-      },
-      y: -300,
-      x: -50,
-      opacity: 0.15,
-      rotationZ: -5,
-      transformPerspective: 600
-    })
-
-    featuresRefs.value.forEach((el, index) => {
+    featureRefs.value.forEach((el, i) => {
       gsap.from(el, {
         scrollTrigger: {
           trigger: el,
-          start: 'top 80%',
-          toggleActions: 'play none none none'
+          start: 'top 85%',
+          toggleActions: 'play none none none',
         },
-        y: 80,
+        y: 50,
         opacity: 0,
-        scale: 0.8,
-        rotationX: 15,
-        duration: 1,
-        delay: index * 0.15,
-        ease: 'power3.out',
-        transformPerspective: 800
+        duration: 0.8,
+        delay: i * 0.12,
+        ease: 'power2.out',
       })
+    })
+
+    gsap.from('.features-title', {
+      scrollTrigger: {
+        trigger: featuresSectionRef.value,
+        start: 'top 80%',
+      },
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.out',
     })
 
     gsap.from(footerRef.value, {
       scrollTrigger: {
         trigger: footerRef.value,
-        start: 'top 90%'
+        start: 'top 95%',
       },
-      y: 60,
+      y: 30,
       opacity: 0,
-      duration: 1,
-      ease: 'power3.out'
+      duration: 0.8,
+      ease: 'power2.out',
     })
   })
 })
-
-function onTiltMove(e) {
-  const cards = document.querySelectorAll('.feature-card-3d')
-  const rect = heroSectionRef.value?.getBoundingClientRect()
-  if (!rect) return
-  const centerX = rect.left + rect.width / 2
-  const centerY = rect.top + rect.height / 2
-  const mouseX = (e.clientX - centerX) / window.innerWidth
-  const mouseY = (e.clientY - centerY) / window.innerHeight
-
-  cards.forEach((card, i) => {
-    const depth = (i % 3 + 1) * 20
-    gsap.to(card, {
-      rotationY: mouseX * 15 * (depth / 20),
-      rotationX: -mouseY * 15 * (depth / 20),
-      translateZ: mouseX * depth,
-      duration: 0.8,
-      ease: 'power2.out',
-      overwrite: true
-    })
-  })
-}
 
 onBeforeUnmount(() => {
   if (ctx) ctx.revert()
-  if (lenisRef) {
-    lenisRef.destroy()
-  }
-  document.removeEventListener('mousemove', onTiltMove)
+  if (lenis) lenis.destroy()
 })
-
-let lenisRef = null
 </script>
 
 <template>
-  <div class="site-container bg-black text-white selection:bg-white selection:text-black overflow-x-hidden">
+  <div class="site">
     <ThreeBackground />
 
     <!-- HEADER -->
-    <header
-      ref="headerRef"
-      class="fixed-top p-4 transition-slow z-50"
-      :class="{ 'opacity-0 -translate-y-full pointer-events-none': !isHeaderVisible }"
-      style="transform-style: preserve-3d;"
-    >
-      <nav class="container-fluid d-flex justify-content-between align-items-center glass-dark rounded-flow p-3 px-4 max-w-7xl mx-auto shadow-2xl" style="transform-style: preserve-3d;">
-        <a href="/" class="d-flex align-items-center text-decoration-none text-white fw-black tracking-tighter gap-2 hover:opacity-70 transition-slow">
-          <img src="/src/assets/imgs/logo/complext-logo.webp" alt="Complext Logo" class="logo">
-          <span class="fs-4 uppercase">Complext</span>
+    <header ref="headerRef" class="header" :class="{ 'header--hidden': !isHeaderVisible }">
+      <div class="header-inner">
+        <a href="/" class="header-logo">
+          <img src="/src/assets/imgs/logo/complext-logo.webp" alt="Complext" class="header-logo-img">
+          <span>Complext</span>
         </a>
-        <div class="d-flex gap-4">
-          <a href="#subthemes" class="text-white text-opacity-50 hover:text-opacity-100 text-decoration-none fw-bold small transition-slow uppercase tracking-widest">Explore</a>
-          <a href="https://github.com/Fast4gc/Complext" class="text-white text-opacity-50 hover:text-opacity-100 text-decoration-none fw-bold small transition-slow uppercase tracking-widest">Github</a>
-        </div>
-      </nav>
+        <nav class="header-nav">
+          <a href="#features">Features</a>
+          <a href="https://github.com/Fast4gc/Complext">GitHub</a>
+        </nav>
+        <a href="keys" class="header-cta">Get started</a>
+      </div>
     </header>
 
     <main>
-      <!-- HERO SECTION -->
-      <section id="hero" ref="heroSectionRef" class="min-h-screen position-relative d-flex flex-column align-items-center justify-content-center overflow-hidden pt-20" style="perspective: 1000px; transform-style: preserve-3d;">
-
-        <!-- Ambient 3D Glows -->
-        <div class="ambient-glow glow-1 parallax-back" style="transform-style: preserve-3d;"></div>
-        <div class="ambient-glow glow-2 parallax-back" style="transform-style: preserve-3d;"></div>
-        <div class="ambient-glow glow-3 pulse-glow" style="transform-style: preserve-3d;"></div>
-
-        <!-- Animated Background Cards Grid -->
-        <div ref="cardsGridRef" class="position-absolute top-0 start-0 w-100 h-100 d-grid grid-cols-4 md:grid-cols-6 gap-3 p-3 opacity-15 pointer-events-none" style="transform-style: preserve-3d;">
-          <div
-            v-for="(card, i) in heroCards"
-            :key="card.id"
-            class="hero-card glass rounded-3 aspect-square d-flex align-items-center justify-content-center tilt-effect"
-            :style="{ transform: `scale(${card.scale}) translateY(${card.y}px)`, transformStyle: 'preserve-3d' }"
-            :class="{ 'feature-card-3d': true }"
-          >
-            <font-awesome-icon icon="code" class="text-white text-opacity-10 fs-1" />
-          </div>
+      <!-- HERO -->
+      <section id="hero" ref="heroSectionRef" class="hero">
+        <!-- Halftone Hands -->
+        <div class="hero-hand hero-hand--left">
+          <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.35">
+              <circle cx="50" cy="180" r="2" fill="white"/>
+              <circle cx="55" cy="175" r="2" fill="white"/>
+              <circle cx="60" cy="170" r="2" fill="white"/>
+              <circle cx="65" cy="165" r="2" fill="white"/>
+              <circle cx="70" cy="160" r="2" fill="white"/>
+              <circle cx="75" cy="155" r="2" fill="white"/>
+              <circle cx="80" cy="150" r="2" fill="white"/>
+              <circle cx="85" cy="145" r="2" fill="white"/>
+              <circle cx="90" cy="140" r="2" fill="white"/>
+              <circle cx="95" cy="135" r="2" fill="white"/>
+              <circle cx="100" cy="130" r="2" fill="white"/>
+              <circle cx="105" cy="125" r="2" fill="white"/>
+              <circle cx="110" cy="120" r="2" fill="white"/>
+              <circle cx="115" cy="118" r="2" fill="white"/>
+              <circle cx="120" cy="116" r="2" fill="white"/>
+              <circle cx="125" cy="115" r="2" fill="white"/>
+              <circle cx="130" cy="116" r="2" fill="white"/>
+              <circle cx="135" cy="118" r="2" fill="white"/>
+              <circle cx="140" cy="120" r="2" fill="white"/>
+              <circle cx="145" cy="122" r="2" fill="white"/>
+              <circle cx="150" cy="125" r="2" fill="white"/>
+              <circle cx="155" cy="128" r="2" fill="white"/>
+              <circle cx="160" cy="130" r="2" fill="white"/>
+              <circle cx="165" cy="132" r="2" fill="white"/>
+              <circle cx="170" cy="135" r="2" fill="white"/>
+              <circle cx="175" cy="138" r="2" fill="white"/>
+              <circle cx="180" cy="140" r="2" fill="white"/>
+              <circle cx="185" cy="142" r="2" fill="white"/>
+              <circle cx="190" cy="145" r="2" fill="white"/>
+              <circle cx="195" cy="148" r="2" fill="white"/>
+              <circle cx="200" cy="150" r="2" fill="white"/>
+              <circle cx="205" cy="152" r="2" fill="white"/>
+              <circle cx="210" cy="154" r="2" fill="white"/>
+              <circle cx="215" cy="156" r="2" fill="white"/>
+              <circle cx="220" cy="158" r="2" fill="white"/>
+              <circle cx="225" cy="160" r="2" fill="white"/>
+              <circle cx="230" cy="162" r="2" fill="white"/>
+              <circle cx="235" cy="164" r="2" fill="white"/>
+              <circle cx="240" cy="166" r="2" fill="white"/>
+              <circle cx="245" cy="168" r="2" fill="white"/>
+              <circle cx="250" cy="170" r="2" fill="white"/>
+              <circle cx="255" cy="172" r="2" fill="white"/>
+              <circle cx="260" cy="175" r="2" fill="white"/>
+              <circle cx="265" cy="178" r="2" fill="white"/>
+              <circle cx="270" cy="180" r="2" fill="white"/>
+              <circle cx="275" cy="182" r="2" fill="white"/>
+              <circle cx="280" cy="185" r="2" fill="white"/>
+              <circle cx="285" cy="188" r="2" fill="white"/>
+              <circle cx="290" cy="190" r="2" fill="white"/>
+              <circle cx="295" cy="192" r="2" fill="white"/>
+              <circle cx="300" cy="195" r="2" fill="white"/>
+              <circle cx="305" cy="198" r="2" fill="white"/>
+              <circle cx="310" cy="200" r="2" fill="white"/>
+              <circle cx="315" cy="202" r="2" fill="white"/>
+              <circle cx="320" cy="205" r="2" fill="white"/>
+              <circle cx="325" cy="208" r="2" fill="white"/>
+              <circle cx="330" cy="210" r="2" fill="white"/>
+              <circle cx="335" cy="212" r="2" fill="white"/>
+              <circle cx="340" cy="215" r="2" fill="white"/>
+              <circle cx="345" cy="218" r="2" fill="white"/>
+              <circle cx="350" cy="220" r="2" fill="white"/>
+              <circle cx="355" cy="222" r="2" fill="white"/>
+              <circle cx="360" cy="225" r="2" fill="white"/>
+              <circle cx="365" cy="228" r="2" fill="white"/>
+              <circle cx="370" cy="230" r="2" fill="white"/>
+              <circle cx="375" cy="232" r="2" fill="white"/>
+              <circle cx="380" cy="235" r="2" fill="white"/>
+              <circle cx="385" cy="238" r="2" fill="white"/>
+              <circle cx="390" cy="240" r="2" fill="white"/>
+              <circle cx="80" cy="200" r="2" fill="white"/>
+              <circle cx="90" cy="195" r="2" fill="white"/>
+              <circle cx="100" cy="190" r="2" fill="white"/>
+              <circle cx="110" cy="185" r="2" fill="white"/>
+              <circle cx="120" cy="180" r="2" fill="white"/>
+              <circle cx="130" cy="175" r="2" fill="white"/>
+              <circle cx="140" cy="170" r="2" fill="white"/>
+              <circle cx="150" cy="168" r="2" fill="white"/>
+              <circle cx="160" cy="166" r="2" fill="white"/>
+              <circle cx="170" cy="164" r="2" fill="white"/>
+              <circle cx="180" cy="162" r="2" fill="white"/>
+              <circle cx="190" cy="160" r="2" fill="white"/>
+              <circle cx="200" cy="158" r="2" fill="white"/>
+              <circle cx="210" cy="156" r="2" fill="white"/>
+              <circle cx="220" cy="154" r="2" fill="white"/>
+              <circle cx="230" cy="152" r="2" fill="white"/>
+              <circle cx="240" cy="150" r="2" fill="white"/>
+              <circle cx="250" cy="148" r="2" fill="white"/>
+              <circle cx="260" cy="146" r="2" fill="white"/>
+              <circle cx="270" cy="144" r="2" fill="white"/>
+              <circle cx="280" cy="142" r="2" fill="white"/>
+              <circle cx="290" cy="140" r="2" fill="white"/>
+              <circle cx="300" cy="138" r="2" fill="white"/>
+              <circle cx="310" cy="136" r="2" fill="white"/>
+              <circle cx="320" cy="135" r="2" fill="white"/>
+              <circle cx="330" cy="135" r="2" fill="white"/>
+              <circle cx="340" cy="136" r="2" fill="white"/>
+              <circle cx="350" cy="138" r="2" fill="white"/>
+              <circle cx="360" cy="140" r="2" fill="white"/>
+              <circle cx="100" cy="210" r="2" fill="white"/>
+              <circle cx="120" cy="200" r="2" fill="white"/>
+              <circle cx="140" cy="195" r="2" fill="white"/>
+              <circle cx="160" cy="190" r="2" fill="white"/>
+              <circle cx="180" cy="185" r="2" fill="white"/>
+              <circle cx="200" cy="180" r="2" fill="white"/>
+              <circle cx="220" cy="175" r="2" fill="white"/>
+              <circle cx="240" cy="170" r="2" fill="white"/>
+              <circle cx="260" cy="168" r="2" fill="white"/>
+              <circle cx="280" cy="166" r="2" fill="white"/>
+              <circle cx="300" cy="165" r="2" fill="white"/>
+              <circle cx="320" cy="165" r="2" fill="white"/>
+              <circle cx="340" cy="166" r="2" fill="white"/>
+              <circle cx="360" cy="168" r="2" fill="white"/>
+              <circle cx="110" cy="220" r="2" fill="white"/>
+              <circle cx="130" cy="215" r="2" fill="white"/>
+              <circle cx="150" cy="210" r="2" fill="white"/>
+              <circle cx="170" cy="205" r="2" fill="white"/>
+              <circle cx="190" cy="200" r="2" fill="white"/>
+              <circle cx="210" cy="195" r="2" fill="white"/>
+              <circle cx="230" cy="190" r="2" fill="white"/>
+              <circle cx="250" cy="188" r="2" fill="white"/>
+              <circle cx="270" cy="186" r="2" fill="white"/>
+              <circle cx="290" cy="185" r="2" fill="white"/>
+              <circle cx="310" cy="185" r="2" fill="white"/>
+              <circle cx="330" cy="186" r="2" fill="white"/>
+              <circle cx="350" cy="188" r="2" fill="white"/>
+              <circle cx="370" cy="190" r="2" fill="white"/>
+            </g>
+          </svg>
         </div>
 
-        <div class="container text-center position-relative z-1 py-20" style="transform-style: preserve-3d;">
-          <div ref="heroTitleRef" class="hero-svg-container mb-4 hero-title-3d" style="transform-style: preserve-3d;">
-            <svg viewBox="0 0 800 200" class="complext-svg" style="transform-style: preserve-3d;">
-              <defs>
-                <filter id="liquid-blur">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-                  <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -10" result="gooey" />
-                </filter>
-                <mask id="text-mask">
-                  <text x="50%" y="50%" dy=".35em" text-anchor="middle" class="svg-text-base">COMPLEXT</text>
-                </mask>
-                <linearGradient id="liquid-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="white" stop-opacity="0" />
-                  <stop offset="50%" stop-color="white" stop-opacity="0.8" />
-                  <stop offset="100%" stop-color="white" stop-opacity="0" />
-                </linearGradient>
-              </defs>
-              <text x="50%" y="50%" dy=".35em" text-anchor="middle" class="svg-text-base opacity-20">COMPLEXT</text>
-              <rect x="-200" y="0" width="200" height="200" fill="url(#liquid-gradient)" mask="url(#text-mask)" class="liquid-blob" filter="url(#liquid-blur)" />
-              <text x="50%" y="50%" dy=".35em" text-anchor="middle" class="svg-text-base">COMPLEXT</text>
-            </svg>
-          </div>
-          <p ref="heroSubtitleRef" class="lead-huge text-white text-opacity-50 max-w-3xl mx-auto mb-5 fw-medium">
-            Where performance meets simplicity. Reimagining Steam promotions with high-fidelity automation and sleek design.
+        <div class="hero-hand hero-hand--right">
+          <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.35">
+              <circle cx="350" cy="180" r="2" fill="white"/>
+              <circle cx="345" cy="175" r="2" fill="white"/>
+              <circle cx="340" cy="170" r="2" fill="white"/>
+              <circle cx="335" cy="165" r="2" fill="white"/>
+              <circle cx="330" cy="160" r="2" fill="white"/>
+              <circle cx="325" cy="155" r="2" fill="white"/>
+              <circle cx="320" cy="150" r="2" fill="white"/>
+              <circle cx="315" cy="145" r="2" fill="white"/>
+              <circle cx="310" cy="140" r="2" fill="white"/>
+              <circle cx="305" cy="135" r="2" fill="white"/>
+              <circle cx="300" cy="130" r="2" fill="white"/>
+              <circle cx="295" cy="125" r="2" fill="white"/>
+              <circle cx="290" cy="120" r="2" fill="white"/>
+              <circle cx="285" cy="118" r="2" fill="white"/>
+              <circle cx="280" cy="116" r="2" fill="white"/>
+              <circle cx="275" cy="115" r="2" fill="white"/>
+              <circle cx="270" cy="116" r="2" fill="white"/>
+              <circle cx="265" cy="118" r="2" fill="white"/>
+              <circle cx="260" cy="120" r="2" fill="white"/>
+              <circle cx="255" cy="122" r="2" fill="white"/>
+              <circle cx="250" cy="125" r="2" fill="white"/>
+              <circle cx="245" cy="128" r="2" fill="white"/>
+              <circle cx="240" cy="130" r="2" fill="white"/>
+              <circle cx="235" cy="132" r="2" fill="white"/>
+              <circle cx="230" cy="135" r="2" fill="white"/>
+              <circle cx="225" cy="138" r="2" fill="white"/>
+              <circle cx="220" cy="140" r="2" fill="white"/>
+              <circle cx="215" cy="142" r="2" fill="white"/>
+              <circle cx="210" cy="145" r="2" fill="white"/>
+              <circle cx="205" cy="148" r="2" fill="white"/>
+              <circle cx="200" cy="150" r="2" fill="white"/>
+              <circle cx="195" cy="152" r="2" fill="white"/>
+              <circle cx="190" cy="154" r="2" fill="white"/>
+              <circle cx="185" cy="156" r="2" fill="white"/>
+              <circle cx="180" cy="158" r="2" fill="white"/>
+              <circle cx="175" cy="160" r="2" fill="white"/>
+              <circle cx="170" cy="162" r="2" fill="white"/>
+              <circle cx="165" cy="164" r="2" fill="white"/>
+              <circle cx="160" cy="166" r="2" fill="white"/>
+              <circle cx="155" cy="168" r="2" fill="white"/>
+              <circle cx="150" cy="170" r="2" fill="white"/>
+              <circle cx="145" cy="172" r="2" fill="white"/>
+              <circle cx="140" cy="175" r="2" fill="white"/>
+              <circle cx="135" cy="178" r="2" fill="white"/>
+              <circle cx="130" cy="180" r="2" fill="white"/>
+              <circle cx="125" cy="182" r="2" fill="white"/>
+              <circle cx="120" cy="185" r="2" fill="white"/>
+              <circle cx="115" cy="188" r="2" fill="white"/>
+              <circle cx="110" cy="190" r="2" fill="white"/>
+              <circle cx="105" cy="192" r="2" fill="white"/>
+              <circle cx="100" cy="195" r="2" fill="white"/>
+              <circle cx="95" cy="198" r="2" fill="white"/>
+              <circle cx="90" cy="200" r="2" fill="white"/>
+              <circle cx="85" cy="202" r="2" fill="white"/>
+              <circle cx="80" cy="205" r="2" fill="white"/>
+              <circle cx="75" cy="208" r="2" fill="white"/>
+              <circle cx="70" cy="210" r="2" fill="white"/>
+              <circle cx="65" cy="212" r="2" fill="white"/>
+              <circle cx="60" cy="215" r="2" fill="white"/>
+              <circle cx="55" cy="218" r="2" fill="white"/>
+              <circle cx="50" cy="220" r="2" fill="white"/>
+              <circle cx="45" cy="222" r="2" fill="white"/>
+              <circle cx="40" cy="225" r="2" fill="white"/>
+              <circle cx="35" cy="228" r="2" fill="white"/>
+              <circle cx="30" cy="230" r="2" fill="white"/>
+              <circle cx="25" cy="232" r="2" fill="white"/>
+              <circle cx="20" cy="235" r="2" fill="white"/>
+              <circle cx="15" cy="238" r="2" fill="white"/>
+              <circle cx="10" cy="240" r="2" fill="white"/>
+              <circle cx="320" cy="200" r="2" fill="white"/>
+              <circle cx="310" cy="195" r="2" fill="white"/>
+              <circle cx="300" cy="190" r="2" fill="white"/>
+              <circle cx="290" cy="185" r="2" fill="white"/>
+              <circle cx="280" cy="180" r="2" fill="white"/>
+              <circle cx="270" cy="175" r="2" fill="white"/>
+              <circle cx="260" cy="170" r="2" fill="white"/>
+              <circle cx="250" cy="168" r="2" fill="white"/>
+              <circle cx="240" cy="166" r="2" fill="white"/>
+              <circle cx="230" cy="164" r="2" fill="white"/>
+              <circle cx="220" cy="162" r="2" fill="white"/>
+              <circle cx="210" cy="160" r="2" fill="white"/>
+              <circle cx="200" cy="158" r="2" fill="white"/>
+              <circle cx="190" cy="156" r="2" fill="white"/>
+              <circle cx="180" cy="154" r="2" fill="white"/>
+              <circle cx="170" cy="152" r="2" fill="white"/>
+              <circle cx="160" cy="150" r="2" fill="white"/>
+              <circle cx="150" cy="148" r="2" fill="white"/>
+              <circle cx="140" cy="146" r="2" fill="white"/>
+              <circle cx="130" cy="144" r="2" fill="white"/>
+              <circle cx="120" cy="142" r="2" fill="white"/>
+              <circle cx="110" cy="140" r="2" fill="white"/>
+              <circle cx="100" cy="138" r="2" fill="white"/>
+              <circle cx="90" cy="136" r="2" fill="white"/>
+              <circle cx="80" cy="135" r="2" fill="white"/>
+              <circle cx="70" cy="135" r="2" fill="white"/>
+              <circle cx="60" cy="136" r="2" fill="white"/>
+              <circle cx="50" cy="138" r="2" fill="white"/>
+              <circle cx="40" cy="140" r="2" fill="white"/>
+              <circle cx="300" cy="210" r="2" fill="white"/>
+              <circle cx="280" cy="200" r="2" fill="white"/>
+              <circle cx="260" cy="195" r="2" fill="white"/>
+              <circle cx="240" cy="190" r="2" fill="white"/>
+              <circle cx="220" cy="185" r="2" fill="white"/>
+              <circle cx="200" cy="180" r="2" fill="white"/>
+              <circle cx="180" cy="175" r="2" fill="white"/>
+              <circle cx="160" cy="170" r="2" fill="white"/>
+              <circle cx="140" cy="168" r="2" fill="white"/>
+              <circle cx="120" cy="166" r="2" fill="white"/>
+              <circle cx="100" cy="165" r="2" fill="white"/>
+              <circle cx="80" cy="165" r="2" fill="white"/>
+              <circle cx="60" cy="166" r="2" fill="white"/>
+              <circle cx="40" cy="168" r="2" fill="white"/>
+              <circle cx="290" cy="220" r="2" fill="white"/>
+              <circle cx="270" cy="215" r="2" fill="white"/>
+              <circle cx="250" cy="210" r="2" fill="white"/>
+              <circle cx="230" cy="205" r="2" fill="white"/>
+              <circle cx="210" cy="200" r="2" fill="white"/>
+              <circle cx="190" cy="195" r="2" fill="white"/>
+              <circle cx="170" cy="190" r="2" fill="white"/>
+              <circle cx="150" cy="188" r="2" fill="white"/>
+              <circle cx="130" cy="186" r="2" fill="white"/>
+              <circle cx="110" cy="185" r="2" fill="white"/>
+              <circle cx="90" cy="185" r="2" fill="white"/>
+              <circle cx="70" cy="186" r="2" fill="white"/>
+              <circle cx="50" cy="188" r="2" fill="white"/>
+              <circle cx="30" cy="190" r="2" fill="white"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Centerpiece -->
+        <div class="hero-centerpiece">
+          <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="crystal-grad" x1="50%" y1="0%" x2="50%" y2="100%">
+                <stop offset="0%" stop-color="#a855f7"/>
+                <stop offset="50%" stop-color="#c084fc"/>
+                <stop offset="100%" stop-color="#7c3aed"/>
+              </linearGradient>
+              <filter id="crystal-glow">
+                <feGaussianBlur stdDeviation="8" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <path d="M100 20 L130 60 L100 180 L70 60 Z" fill="url(#crystal-grad)" opacity="0.9" filter="url(#crystal-glow)"/>
+            <path d="M100 20 L180 70 L100 180 L20 70 Z" fill="url(#crystal-grad)" opacity="0.4" filter="url(#crystal-glow)"/>
+            <path d="M60 50 L140 50 L130 60 L70 60 Z" fill="white" opacity="0.15"/>
+            <line x1="100" y1="20" x2="100" y2="180" stroke="white" stroke-width="0.5" opacity="0.3"/>
+            <line x1="20" y1="70" x2="180" y2="70" stroke="white" stroke-width="0.5" opacity="0.2"/>
+          </svg>
+        </div>
+
+        <!-- Glow -->
+        <div class="hero-glow"></div>
+
+        <!-- Text -->
+        <div class="hero-content">
+          <h1 ref="heroTitleRef" class="hero-title">
+            When intelligence reaches out to instinct, the future takes shape
+          </h1>
+          <p ref="heroSubtitleRef" class="hero-subtitle">
+            an unlikely alliance — where human intuition and algorithmic precision move as one
           </p>
-
-          <div class="d-flex flex-column flex-sm-row justify-content-center gap-4 mt-10">
-            <a href="keys" class="btn btn-white-pill glow-on-hover d-flex align-items-center justify-content-center gap-2 tilt-effect">
-              <font-awesome-icon icon="key" />
-              Get Started
-            </a>
-            <a href="#subthemes" class="btn btn-outline-pill d-flex align-items-center justify-content-center gap-2 tilt-effect">
-              Learn More
+          <div ref="heroBtnRef" class="hero-actions">
+            <a href="keys" class="btn-cta">
+              See it in action
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="8" x2="13" y2="8"/>
+                <polyline points="9,4 13,8 9,12"/>
+              </svg>
             </a>
           </div>
         </div>
 
-        <!-- Scroll Indicator -->
-        <div class="position-absolute bottom-0 mb-10 text-center opacity-30 bounce-animation" style="transform-style: preserve-3d;">
-          <span class="small uppercase tracking-widest fw-bold mb-2 d-block">Scroll to explore</span>
-          <div class="mx-auto bg-white" style="width: 1px; height: 60px;"></div>
+        <!-- Scroll hint -->
+        <div class="scroll-hint">
+          <div class="scroll-hint-line"></div>
         </div>
       </section>
 
-      <!-- FEATURES SECTION -->
-      <section id="subthemes" ref="featuresSectionRef" class="py-5 position-relative" style="perspective: 1000px; transform-style: preserve-3d;">
-        <div class="ambient-glow glow-1" style="top: 20%; right: -100px; transform-style: preserve-3d;"></div>
-        <div class="ambient-glow glow-2" style="bottom: 20%; left: -100px; transform-style: preserve-3d;"></div>
+      <!-- FEATURES -->
+      <section id="features" ref="featuresSectionRef" class="features">
+        <div class="features-inner">
+          <h2 class="features-title">
+            Built for the <span class="features-highlight">future</span>
+          </h2>
+          <p class="features-subtitle">
+            Our core architecture is built on the most advanced models to deliver speed and reliability.
+          </p>
 
-        <div class="container max-w-7xl mx-auto px-4">
-          <div class="mb-5 text-center" style="transform-style: preserve-3d;">
-            <h2 class="display-3 fw-black tracking-tighter mb-4" style="transform-style: preserve-3d;">ENGINEERED FOR <span class="text-stroke-white">FLOW</span></h2>
-            <p class="lead text-white text-opacity-50 max-w-2xl mx-auto">
-              Our core architecture is built on the most advanced models to deliver speed and reliability.
-            </p>
-          </div>
-
-          <div class="row g-4 justify-content-center" style="transform-style: preserve-3d;">
+          <div class="features-grid">
             <div
-              v-for="(feature, index) in [
-                { title: 'Python Core', desc: 'Robust backend using 3.11+ for intelligent processing.', icon: 'rocket' },
-                { title: 'Vue 3 UI', desc: 'Granular reactivity for a seamless user experience.', icon: 'code' },
-                { title: 'GSAP Motion', desc: 'High-performance animations that guide the eye.', icon: 'star' }
-              ]"
-              :key="index"
+              v-for="(feature, i) in features"
+              :key="i"
               :ref="setFeatureRef"
-              class="col-lg-4 col-md-6"
-              style="transform-style: preserve-3d;"
+              class="feature-card"
             >
-              <div
-                class="glass-3d rounded-flow p-5 h-100 transition-slow hover:bg-white hover:text-black group glow-on-hover overflow-hidden position-relative card-3d feature-card-3d"
-                :style="{ transformStyle: 'preserve-3d' }"
-              >
-                <div class="position-absolute top-0 end-0 p-5 opacity-5 group-hover:opacity-10 transition-slow" style="transform-style: preserve-3d;">
-                  <font-awesome-icon :icon="feature.icon" style="font-size: 8rem;" />
-                </div>
-                <div class="fs-1 fw-black mb-4 opacity-10 group-hover:opacity-100 transition-slow">0{{ index + 1 }}</div>
-                <h3 class="h2 fw-black mb-3 tracking-tighter uppercase">{{ feature.title }}</h3>
-                <p class="fw-medium text-opacity-60 group-hover:text-opacity-100 transition-slow">{{ feature.desc }}</p>
+              <div class="feature-card-icon">
+                <font-awesome-icon :icon="feature.icon" />
               </div>
+              <h3 class="feature-card-title">{{ feature.title }}</h3>
+              <p class="feature-card-desc">{{ feature.desc }}</p>
             </div>
           </div>
         </div>
@@ -302,150 +507,426 @@ let lenisRef = null
     </main>
 
     <!-- FOOTER -->
-    <footer ref="footerRef" class="py-5 border-top border-white border-opacity-5" style="transform-style: preserve-3d;">
-      <div class="container max-w-7xl mx-auto text-center">
-        <div class="d-flex align-items-center justify-content-center fw-black text-white mb-4 tracking-tighter gap-2 py-2 pt-4">
-          <img src="/src/assets/imgs/logo/complext-logo.webp" alt="Complext Logo" class="logo">
-          <span class="fs-2 uppercase">Complext</span>
+    <footer ref="footerRef" class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="/src/assets/imgs/logo/complext-logo.webp" alt="Complext" class="footer-logo">
+          <span>Complext</span>
         </div>
-
-        <div class="d-flex justify-content-center gap-3 mb-10">
-          <a href="https://github.com/Fast4gc/Complext" class="text-white text-opacity-30 hover:text-opacity-100 transition-slow fs-3 tilt-effect">
+        <div class="footer-links">
+          <a href="https://github.com/Fast4gc/Complext" class="footer-link">
             <font-awesome-icon :icon="['fab', 'github']" />
           </a>
-          <a href="https://discord.gg/gZhnBrxWqA" class="text-white text-opacity-30 hover:text-opacity-100 transition-slow fs-3 tilt-effect">
+          <a href="https://discord.gg/gZhnBrxWqA" class="footer-link">
             <font-awesome-icon :icon="['fab', 'discord']" />
           </a>
         </div>
-
-        <p class="text-white text-opacity-10 mb-1 fw-black small tracking-widest uppercase pt-4">&copy; 2026 Complext Studio. Reimagining Automation.</p>
+        <p class="footer-copy">&copy; 2026 Complext Studio</p>
       </div>
     </footer>
   </div>
 </template>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-
-:root {
-  --font-main: 'Inter', sans-serif;
+<style scoped>
+.site {
+  position: relative;
+  min-height: 100vh;
 }
 
-body {
-  font-family: var(--font-main);
-  background-color: #0a0a0a;
-  color: #fff;
+/* Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 16px 24px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.display-huge {
-  font-size: clamp(4rem, 15vw, 12rem);
-  font-weight: 900;
-  line-height: 0.85;
+.header--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
-.hero-svg-container {
-  width: 100%;
-  max-width: 1000px;
+.header-inner {
+  max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.complext-svg {
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.header-logo-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.header-nav {
+  display: flex;
+  gap: 32px;
+}
+
+.header-nav a {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.25s ease;
+}
+
+.header-nav a:hover {
+  color: white;
+}
+
+.header-cta {
+  padding: 8px 20px;
+  border-radius: 100px;
+  background: white;
+  color: black;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.header-cta:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 120px 24px 80px;
+}
+
+.hero-hand {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40%;
+  max-width: 500px;
+  pointer-events: none;
+}
+
+.hero-hand--left {
+  left: -5%;
+}
+
+.hero-hand--right {
+  right: -5%;
+}
+
+.hero-hand svg {
   width: 100%;
   height: auto;
-  overflow: visible;
 }
 
-.svg-text-base {
-  font-family: 'Inter', sans-serif;
-  font-weight: 900;
-  font-size: 150px;
-  letter-spacing: -0.05em;
-  fill: #ffffff;
+.hero-centerpiece {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  animation: centerpiece-float 6s ease-in-out infinite;
 }
 
-.liquid-blob {
-  animation: liquid-pass 6s infinite ease-in-out;
+@keyframes centerpiece-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+  50% { transform: translate(-50%, -50%) translateY(-15px); }
 }
 
-@keyframes liquid-pass {
-  0% { transform: translateX(-1000px); }
-  100% { transform: translateX(1000px); }
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: glow-pulse 4s ease-in-out infinite;
 }
 
-.lead-huge {
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  line-height: 1.4;
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
 }
 
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
-
-.max-w-7xl { max-width: 1280px; }
-.max-w-3xl { max-width: 48rem; }
-.max-w-2xl { max-width: 42rem; }
-
-.btn-white-pill {
-  background-color: #fff;
-  color: #000;
-  border-radius: 50rem;
-  padding: 1rem 2.5rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  text-decoration: none;
-  transform-style: preserve-3d;
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 720px;
 }
 
-.btn-white-pill:hover {
-  background-color: #f0f0f0;
-  transform: scale(1.05) translateZ(10px);
+.hero-title {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: white;
+  margin-bottom: 24px;
 }
 
-.btn-outline-pill {
-  background-color: transparent;
-  color: #fff;
+.hero-subtitle {
+  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 100px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50rem;
-  padding: 1rem 2.5rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  color: white;
   text-decoration: none;
-  transform-style: preserve-3d;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-outline-pill:hover {
-  border-color: #fff;
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: scale(1.05) translateZ(10px);
+.btn-cta:hover {
+  border-color: white;
+  background: rgba(255, 255, 255, 0.06);
+  transform: scale(1.04);
 }
 
-.text-stroke-white {
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
-  color: transparent;
+.scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.bounce-animation {
-  animation: bounce-vertical 2s infinite ease-in-out;
+.scroll-hint-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+  animation: scroll-bounce 2s ease-in-out infinite;
 }
 
-@keyframes bounce-vertical {
-  0%, 100% { transform: translateY(0); opacity: 0.3; }
-  50% { transform: translateY(-10px); opacity: 0.6; }
+@keyframes scroll-bounce {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 0.7; transform: scaleY(1.2); }
 }
 
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+/* Features */
+.features {
+  position: relative;
+  z-index: 2;
+  padding: 100px 24px 120px;
+}
+
+.features-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.features-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.features-highlight {
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.features-subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 480px;
+  margin: 0 auto 60px;
+  line-height: 1.6;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
 
 @media (max-width: 768px) {
-  .display-huge { font-size: 5rem; }
-  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
-@media (min-width: 768px) {
-  .md\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+.feature-card {
+  text-align: left;
+  padding: 36px 32px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(168,85,247,0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.feature-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-4px);
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
+
+.feature-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+}
+
+.feature-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.feature-card-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.6;
+}
+
+/* Footer */
+.footer {
+  position: relative;
+  z-index: 2;
+  padding: 40px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: white;
+}
+
+.footer-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.2rem;
+  transition: color 0.25s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-nav {
+    display: none;
+  }
+
+  .hero-hand {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-centerpiece,
+  .hero-glow,
+  .scroll-hint-line {
+    animation: none !important;
+  }
 }
 </style>
