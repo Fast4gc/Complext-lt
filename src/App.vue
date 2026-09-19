@@ -252,10 +252,9 @@ onMounted(() => {
         </div>
       </section>
     </main>
-    <br/>
 
     <!-- FOOTER -->
-    <footer ref="footerRef" class="py-15 border-top border-white border-opacity-5">
+    <footer ref="footerRef" class="py-5 border-top border-white border-opacity-5">
       <div class="container max-w-7xl mx-auto text-center">
         <div class="d-flex align-items-center justify-content-center fw-black text-white mb-4 tracking-tighter gap-2 py-2 pt-4">
           <img src="/src/assets/imgs/logo/complext-logo.webp" alt="Complext Logo" class="logo">
@@ -275,7 +274,6 @@ onMounted(() => {
       </div>
     </footer>
   </div>
-  <br/>
 </template>
 
 <style>
@@ -398,5 +396,8 @@ body {
 @media (max-width: 768px) {
   .display-huge { font-size: 5rem; }
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+  .md\:grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
 }
 </style>
