@@ -201,6 +201,8 @@ onBeforeUnmount(() => motion?.revert())
       <section id="hero" ref="heroSectionRef" class="hero">
         <StarSky />
         <div class="hero-glow-main" aria-hidden="true"></div>
+        <div class="hero-beam" aria-hidden="true"></div>
+        <div class="hero-horizon" aria-hidden="true"></div>
         <div class="hero-side hero-side--left" aria-hidden="true"></div>
         <div class="hero-side hero-side--right" aria-hidden="true"></div>
 
@@ -213,10 +215,10 @@ onBeforeUnmount(() => motion?.revert())
                 <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
                     <linearGradient id="hero-star-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stop-color="#e0f2ff"/>
-                      <stop offset="35%" stop-color="#7c5cff"/>
-                      <stop offset="65%" stop-color="#4f46e5"/>
-                      <stop offset="100%" stop-color="#c026d3"/>
+                      <stop offset="0%" stop-color="#ffffff"/>
+                      <stop offset="35%" stop-color="#6d6878"/>
+                      <stop offset="65%" stop-color="#eee9f6"/>
+                      <stop offset="100%" stop-color="#b58af9"/>
                     </linearGradient>
                     <radialGradient id="hero-star-fill" cx="50%" cy="45%" r="65%">
                       <stop offset="0%" stop-color="#1b1040"/>
@@ -224,7 +226,7 @@ onBeforeUnmount(() => motion?.revert())
                       <stop offset="100%" stop-color="#050310"/>
                     </radialGradient>
                     <filter id="hero-star-blur" x="-40%" y="-40%" width="180%" height="180%">
-                      <feGaussianBlur stdDeviation="7" result="b"/>
+                      <feGaussianBlur stdDeviation="1.5" result="b"/>
                       <feMerge>
                         <feMergeNode in="b"/>
                         <feMergeNode in="SourceGraphic"/>
@@ -244,11 +246,11 @@ onBeforeUnmount(() => motion?.revert())
                 </svg>
               </div>
             </div>
-            <h1 ref="heroNameRef" class="hero-name">COMPLEXT</h1>
+            <h1 ref="heroNameRef" class="hero-name">When intelligence<br><span>meets instinct.</span></h1>
           </div>
 
           <h2 ref="heroTitleRef" class="hero-tagline">
-            When intelligence reaches out to instinct, the future takes shape
+            The future takes shape.
           </h2>
           <p ref="heroSubtitleRef" class="hero-subtitle">
             an unlikely alliance — where human intuition and algorithmic precision move as one
@@ -433,17 +435,17 @@ onBeforeUnmount(() => motion?.revert())
 /* Hero — fused: 3D star + project name spotlight */
 .hero {
   position: relative; z-index: 1;
-  min-height: 100svh;
+  min-height: max(780px, 100svh);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
-  padding: 130px 24px 80px;
+  padding: 180px 24px 210px;
 }
 .hero-glow-main {
-  position: absolute; top: 4%; left: 50%;
+  position: absolute; top: 5%; left: 50%;
   transform: translateX(-50%);
   width: min(92vw, 880px); height: min(72vh, 560px);
-  background: var(--gradient-ambient);
+  background: radial-gradient(ellipse, rgba(181,138,249,0.16), transparent 65%);
   filter: blur(50px);
   pointer-events: none;
 }
@@ -457,10 +459,36 @@ onBeforeUnmount(() => motion?.revert())
   background: linear-gradient(transparent, var(--color-bg));
 }
 .scroll-hint { z-index: 3; }
-.hero-content-inner { position: relative; z-index: 3; text-align: center; max-width: 920px; }
+.hero-beam {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 1px);
+  width: 2px;
+  height: 78%;
+  background: linear-gradient(transparent, rgba(226,214,255,0.35) 20%, transparent 45%, rgba(226,214,255,0.45));
+  box-shadow: 0 0 36px 8px rgba(var(--violet-rgb),0.14);
+  mask-image: linear-gradient(black 15%, transparent 30%, transparent 65%, black);
+  pointer-events: none;
+}
+.hero-horizon {
+  position: absolute;
+  top: 76%;
+  left: -20%;
+  width: 140%;
+  height: 95%;
+  border-radius: 50% 50% 0 0;
+  border-top: 1px solid rgba(231,219,255,0.65);
+  background: var(--color-bg);
+  box-shadow: 0 -10px 50px rgba(var(--violet-rgb),0.16), 0 -1px 14px rgba(224,210,255,0.28);
+  pointer-events: none;
+}
+.hero-actions .btn-cta { padding: 12px 23px; font-size: 0.84rem; font-weight: 500; }
+.hero-actions .btn-solid { background: linear-gradient(#fff, #d8d3df); border-color: #eee7fa; }
+.hero-actions .btn-cta:not(.btn-solid) { background: rgba(255,255,255,0.035); backdrop-filter: blur(12px); }
+.hero-content-inner { position: relative; z-index: 3; text-align: center; width: min(100%, 940px); }
 .hero-eyebrow {
   display: inline-block;
-  font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+  font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--color-muted);
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 100px;
@@ -471,8 +499,8 @@ onBeforeUnmount(() => motion?.revert())
 .hero-stage {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  min-height: clamp(240px, 44vh, 430px);
-  margin: 6px 0 2px;
+  min-height: 210px;
+  margin: 18px 0 0;
 }
 .hero-stage::before {
   content: '';
@@ -485,13 +513,13 @@ onBeforeUnmount(() => motion?.revert())
   pointer-events: none;
 }
 .hero-star-spin {
-  position: absolute; top: 50%; left: 50%;
-  width: min(44vh, 360px); height: min(44vh, 360px);
+  position: absolute; top: 16%; left: 103%;
+  width: 150px; height: 150px;
   transform: translate(-50%, -50%);
   animation: hero-spin 46s linear infinite;
-  opacity: 0.55;
+  opacity: 0.75;
   z-index: 0;
-  filter: drop-shadow(0 0 46px rgba(var(--violet-rgb),0.45));
+  filter: drop-shadow(0 0 18px rgba(var(--violet-rgb),0.2));
 }
 @keyframes hero-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .hero-star-scale { width: 100%; height: 100%; }
@@ -499,25 +527,22 @@ onBeforeUnmount(() => motion?.revert())
 .hero-name {
   position: relative; z-index: 2;
   margin: 0;
-  font-weight: 900; letter-spacing: -0.04em; line-height: 0.95;
-  font-size: clamp(2.6rem, 12.8vw, 11rem);
+  font-weight: 450; letter-spacing: -0.065em; line-height: 1.04;
+  font-size: clamp(2.8rem, 6.4vw, 6rem);
   color: transparent;
-  background-image: linear-gradient(to bottom,
-    #ffffff 0%, #ffffff 36%,
-    #c4b5fd 45%, #a855f7 52%,
-    #ffffff 60%, #ffffff 100%);
+  background-image: linear-gradient(to bottom, #fff 5%, #e4e0eb 36%, #a59daf 70%, #ede7f7 100%);
   background-size: 100% 220%;
   background-position: 50% 0%;
   -webkit-background-clip: text;
   background-clip: text;
-  filter: drop-shadow(0 6px 40px rgba(var(--lilac-rgb),0.35));
+  text-wrap: balance;
 }
 .hero-tagline {
-  font-size: clamp(1.15rem, 2.6vw, 1.7rem);
-  font-weight: 600; line-height: 1.3; letter-spacing: -0.02em;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 400; line-height: 1.3; letter-spacing: -0.02em;
   color: #fff;
   max-width: 660px;
-  margin: 26px auto 14px;
+  margin: 20px auto 12px;
 }
 .hero-subtitle {
   font-size: clamp(0.95rem, 1.8vw, 1.1rem);
@@ -541,8 +566,8 @@ onBeforeUnmount(() => motion?.revert())
 .hero-side {
   position: absolute; top: 50%; transform: translateY(-50%);
   width: 34%; height: 70%;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.35) 1.2px, transparent 1.8px);
-  background-size: 11px 11px;
+  background-image: linear-gradient(rgba(255,255,255,0.065) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.065) 1px, transparent 1px);
+  background-size: 64px 64px;
   pointer-events: none;
 }
 .hero-side--left {
@@ -711,8 +736,8 @@ onBeforeUnmount(() => motion?.revert())
   .stat { padding: 34px 24px; }
   .stat + .stat::before { display: none; }
   .hero-side { display: none; }
-  .hero-star-spin { width: min(70vw, 340px); height: min(70vw, 340px); }
-  .hero-stage { min-height: 300px; }
+  .hero-star-spin { width: 86px; height: 86px; left: 92%; top: -22%; opacity: 0.45; }
+  .hero-stage { min-height: 170px; }
   .about-inner { justify-content: flex-start; }
   .about-copy { max-width: 100%; padding-top: 120px; }
   .about-blob { left: -30%; width: 110vw; opacity: 0.7; }
@@ -721,10 +746,10 @@ onBeforeUnmount(() => motion?.revert())
 @media (max-width: 640px) {
   .header { padding: 12px 16px; }
   .header-inner { padding: 10px 14px; }
-  .hero { padding: 112px 20px 64px; min-height: 90svh; }
+  .hero { padding: 160px 20px 160px; min-height: max(740px, 95svh); }
   .hero-content-inner { width: 100%; }
   .hero-eyebrow { font-size: 0.6rem; letter-spacing: 0.16em; }
-  .hero-stage { min-height: 240px; }
+  .hero-stage { min-height: 145px; }
   .features, .how, .about { padding: 80px 20px; }
   .about-blob { opacity: 0.3; }
   .features-grid, .how-grid { gap: 16px; }
