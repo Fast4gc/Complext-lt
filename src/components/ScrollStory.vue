@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
   background-image: linear-gradient(to bottom,
     #171310 0%, #171310 36%,
     #6d28d9 45%, #a855f7 52%,
-    #171310 60%, rgba(23,19,16,0.05) 92%);
+    #171310 60%, #171310 82%, rgba(23,19,16,0.15) 100%);
   background-size: 100% 220%;
   background-position: 50% 0%;
   -webkit-background-clip: text;
@@ -203,7 +203,8 @@ onBeforeUnmount(() => {
 .story-progress {
   position: absolute; bottom: 28px; right: 36px; z-index: 5;
   display: flex; align-items: center; gap: 10px;
-  font-size: 0.72rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.4);
+  font-size: 0.72rem; letter-spacing: 0.2em; color: #fff;
+  mix-blend-mode: difference;
 }
 .tick { opacity: 0.35; transition: opacity 0.3s; }
 .tick.is-active { opacity: 1; color: #fff; }

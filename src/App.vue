@@ -26,6 +26,19 @@ const features = [
   { title: 'GSAP Motion', desc: 'High-performance animations that guide the eye.', icon: 'star' }
 ]
 
+const steps = [
+  { title: 'Connect', desc: 'Link your store, keys and pipeline credentials in minutes.', icon: 'key' },
+  { title: 'Automate', desc: 'Rules and workers handle promos, drops and restocks for you.', icon: 'code' },
+  { title: 'Deploy', desc: 'Ship to production in one click with zero downtime.', icon: 'rocket' },
+  { title: 'Scale', desc: 'From indie drop to global sale without rewriting a thing.', icon: 'star' }
+]
+
+const stats = [
+  { value: 99, prefix: '', suffix: '%', label: 'workflow uptime' },
+  { value: 70, prefix: '−', suffix: '%', label: 'manual busywork' },
+  { value: 3, prefix: '', suffix: 'x', label: 'faster releases' }
+]
+
 onMounted(async () => {
   await nextTick()
   ctx = gsap.context(() => {
@@ -91,6 +104,30 @@ onMounted(async () => {
       })
     })
 
+    // How-it-works steps + stats count-up
+    gsap.utils.toArray('.step-card').forEach((el, i) => {
+      gsap.from(el, {
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        y: 40, opacity: 0, duration: 0.7,
+        delay: (i % 4) * 0.1,
+        ease: 'power2.out',
+        clearProps: 'transform',
+      })
+    })
+
+    gsap.utils.toArray('.stat-num').forEach((el) => {
+      const target = parseFloat(el.dataset.target || '0')
+      const obj = { v: 0 }
+      const num = el.querySelector('b')
+      gsap.to(obj, {
+        v: target,
+        duration: 1.6,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        onUpdate: () => { if (num) num.textContent = Math.round(obj.v) },
+      })
+    })
+
     gsap.from('.features-title', {
       scrollTrigger: { trigger: featuresSectionRef.value, start: 'top 82%', once: true },
       y: 32,
@@ -127,7 +164,7 @@ onMounted(async () => {
 
   // Safety net: never leave cards invisible (fixes frozen mid-animation bug)
   setTimeout(() => {
-    document.querySelectorAll('.feature-card').forEach((el) => {
+    document.querySelectorAll('.feature-card, .step-card').forEach((el) => {
       const o = parseFloat(getComputedStyle(el).opacity)
       if (o < 0.9) {
         gsap.to(el, { opacity: 1, y: 0, duration: 0.4, overwrite: true, clearProps: 'transform' })
@@ -157,6 +194,7 @@ onBeforeUnmount(() => {
         <nav class="header-nav">
           <a href="#story">Story</a>
           <a href="#about">About</a>
+          <a href="#how">How</a>
           <a href="#features">Features</a>
           <a href="https://github.com/Fast4gc/Complext">GitHub</a>
         </nav>
@@ -239,6 +277,14 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
+      <!-- TECH MARQUEE -->
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span>Python</span><span>Vue 3</span><span>GSAP</span><span>Three.js</span><span>Vite</span><span>Lenis</span>
+          <span>Python</span><span>Vue 3</span><span>GSAP</span><span>Three.js</span><span>Vite</span><span>Lenis</span>
+        </div>
+      </div>
+
       <!-- SCROLL STORY: 3D star -> animated text (pinned) -->
       <div id="story">
         <ScrollStory />
@@ -272,8 +318,9 @@ onBeforeUnmount(() => {
       <!-- FEATURES -->
       <section id="features" ref="featuresSectionRef" class="features">
         <div class="features-inner">
+          <p class="section-badge"><i></i>Introduction</p>
           <h2 class="features-title">
-            Built for the <span class="features-highlight">future</span>
+            What is <span class="features-highlight">Complext?</span>
           </h2>
           <p class="features-subtitle">
             Our core architecture is built on the most advanced models to deliver speed and reliability.
@@ -287,6 +334,33 @@ onBeforeUnmount(() => {
               <h3 class="feature-card-title">{{ feature.title }}</h3>
               <p class="feature-card-desc">{{ feature.desc }}</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS (01–04 steps) -->
+      <section id="how" class="how">
+        <div class="how-inner">
+          <p class="section-badge"><i></i>Choose • Deploy • Automate • Iterate</p>
+          <h2 class="features-title">How it works</h2>
+          <p class="features-subtitle">From first connection to full autopilot in four steps.</p>
+          <div class="how-grid">
+            <div v-for="(step, i) in steps" :key="i" class="step-card">
+              <span class="step-num">0{{ i + 1 }}</span>
+              <div class="step-icon"><font-awesome-icon :icon="step.icon" /></div>
+              <h3 class="step-title">{{ step.title }}</h3>
+              <p class="step-desc">{{ step.desc }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATS -->
+      <section class="stats" aria-label="Stats">
+        <div class="stats-inner">
+          <div v-for="(s, i) in stats" :key="i" class="stat">
+            <div class="stat-num" :data-target="s.value"><span class="stat-prefix">{{ s.prefix }}</span><b>0</b><span class="stat-suffix">{{ s.suffix }}</span></div>
+            <p class="stat-label">{{ s.label }}</p>
           </div>
         </div>
       </section>
@@ -350,7 +424,7 @@ onBeforeUnmount(() => {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
-  padding: 130px 24px 70px;
+  padding: 170px 24px 80px;
 }
 .hero-glow-main {
   position: absolute; top: 4%; left: 50%;
@@ -380,12 +454,23 @@ onBeforeUnmount(() => {
   min-height: clamp(240px, 44vh, 430px);
   margin: 6px 0 2px;
 }
+.hero-stage::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(80vw, 720px); height: 62%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,0.6), transparent 70%);
+  filter: blur(28px);
+  z-index: 1;
+  pointer-events: none;
+}
 .hero-star-spin {
   position: absolute; top: 50%; left: 50%;
-  width: min(60vh, 500px); height: min(60vh, 500px);
+  width: min(44vh, 360px); height: min(44vh, 360px);
   transform: translate(-50%, -50%);
   animation: hero-spin 46s linear infinite;
-  opacity: 0.9;
+  opacity: 0.55;
+  z-index: 0;
   filter: drop-shadow(0 0 46px rgba(124,58,237,0.45));
 }
 @keyframes hero-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
@@ -534,6 +619,67 @@ onBeforeUnmount(() => {
 .feature-card-title { font-size: 1.12rem; font-weight: 700; color: #fff; margin: 0 0 10px; }
 .feature-card-desc { font-size: 0.9rem; color: rgba(255,255,255,0.4); line-height: 1.6; margin: 0; }
 
+/* Section badge pill */
+.section-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.02);
+  padding: 7px 16px; border-radius: 100px;
+  margin: 0 0 22px;
+}
+.section-badge i { width: 6px; height: 6px; border-radius: 50%; background: #a855f7; display: inline-block; }
+
+/* Tech marquee */
+.marquee {
+  position: relative; z-index: 2;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.015);
+  overflow: hidden; padding: 16px 0;
+}
+.marquee-track { display: flex; gap: 54px; width: max-content; animation: marquee-scroll 30s linear infinite; }
+.marquee-track span {
+  display: flex; align-items: center; gap: 54px;
+  font-size: 0.78rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(255,255,255,0.32); white-space: nowrap;
+}
+.marquee-track span::after { content: '◆'; font-size: 0.5rem; color: rgba(168,85,247,0.6); }
+@keyframes marquee-scroll { to { transform: translateX(-50%); } }
+
+/* How it works */
+.how { position: relative; z-index: 2; padding: 110px 24px 120px; background: radial-gradient(55% 40% at 50% 0%, rgba(124,58,237,0.07), transparent 70%); }
+.how-inner { max-width: 1150px; margin: 0 auto; text-align: center; }
+.how-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; text-align: left; margin-top: 54px; }
+.step-card {
+  padding: 30px 26px; border-radius: 18px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), border-color 0.3s;
+}
+.step-card:nth-child(even) { background: rgba(168,85,247,0.05); }
+.step-card:hover { transform: translateY(-4px); border-color: rgba(168,85,247,0.35); }
+.step-num { font-size: 0.75rem; letter-spacing: 0.2em; font-weight: 700; color: #a855f7; }
+.step-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: rgba(255,255,255,0.7);
+  margin: 18px 0 14px;
+}
+.step-title { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 8px; }
+.step-desc { font-size: 0.87rem; color: rgba(255,255,255,0.4); line-height: 1.6; margin: 0; }
+
+/* Stats */
+.stats { position: relative; z-index: 2; border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.stats-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+.stat { padding: 52px 24px; text-align: center; position: relative; }
+.stat + .stat::before { content: ''; position: absolute; left: 0; top: 26%; height: 48%; width: 1px; background: rgba(255,255,255,0.08); }
+.stat-num { font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 900; letter-spacing: -0.03em; color: #fff; }
+.stat-prefix, .stat-suffix { color: #a855f7; }
+.stat-label { font-size: 0.8rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin: 10px 0 0; }
+
 /* Footer */
 .footer { position: relative; z-index: 2; padding: 36px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
 .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
@@ -546,6 +692,10 @@ onBeforeUnmount(() => {
 
 @media (max-width: 768px) {
   .features-grid { grid-template-columns: 1fr; }
+  .how-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-inner { grid-template-columns: 1fr; }
+  .stat { padding: 34px 24px; }
+  .stat + .stat::before { display: none; }
   .hero-side { display: none; }
   .hero-star-spin { width: min(70vw, 340px); height: min(70vw, 340px); }
   .hero-stage { min-height: 300px; }
@@ -557,8 +707,9 @@ onBeforeUnmount(() => {
 @media (max-width: 640px) {
   .footer-inner { flex-direction: column; gap: 14px; }
   .header-nav { display: none; }
+  .how-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-star-spin, .scroll-hint-line { animation: none !important; }
+  .hero-star-spin, .scroll-hint-line, .marquee-track { animation: none !important; }
 }
 </style>
