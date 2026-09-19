@@ -50,6 +50,7 @@
           <span ref="blobARef" class="void-blob void-blob--a"></span>
           <span ref="blobBRef" class="void-blob void-blob--b"></span>
         </div>
+        <div class="void-exit" aria-hidden="true"></div>
       </div>
 
       <!-- progress ticks -->
@@ -131,6 +132,7 @@ onMounted(() => {
       // Settle: word drifts slightly, blobs breathe
       tl.to(voidRef.value, { yPercent: -4, duration: 0.6 }, 2.4)
         .to([blobARef.value, blobBRef.value], { scaleY: 1.08, duration: 0.6, stagger: 0.08 }, 2.4)
+        .fromTo('.void-exit', { opacity: 0 }, { opacity: 1, duration: 0.6 }, 2.4)
 
       return () => {}
     })
@@ -152,7 +154,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.scrollstory { position: relative; z-index: 2; background: #000; }
+.scrollstory { position: relative; z-index: 2; background: var(--color-bg); }
 .scrollstory-pin {
   position: relative;
   height: 100vh;
@@ -160,7 +162,7 @@ onBeforeUnmount(() => {
 }
 
 .act { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.act--dark { background: #000; z-index: 1; }
+.act--dark { background: var(--color-bg); z-index: 1; }
 .act--cream { background: var(--color-cream); z-index: 2; opacity: 0; }
 .act--dark > :not(.star-sky) { z-index: 1; }
 .act-hint { position: relative; }
@@ -195,6 +197,13 @@ onBeforeUnmount(() => {
 }
 
 .void-blobs { position: absolute; bottom: -12vh; left: 0; right: 0; height: 34vh; pointer-events: none; }
+.void-exit {
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(76,29,149,0.22) 28%, rgba(20,10,34,0.82) 72%, var(--color-bg) 100%);
+}
 .void-blob { position: absolute; bottom: 0; filter: blur(38px); }
 .void-blob--a {
   left: 4%; width: 44%; height: 120%;

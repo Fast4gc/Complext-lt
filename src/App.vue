@@ -286,6 +286,7 @@ onBeforeUnmount(() => motion?.revert())
       </div>
 
       <!-- ABOUT (Image 3 style) -->
+      <div class="continuation">
       <section id="about" class="about">
         <div class="about-blob" aria-hidden="true"></div>
         <span class="about-outline" aria-hidden="true">ABOUT</span>
@@ -359,6 +360,7 @@ onBeforeUnmount(() => motion?.revert())
           </div>
         </div>
       </section>
+      </div>
     </main>
 
     <!-- FOOTER -->
@@ -384,6 +386,22 @@ onBeforeUnmount(() => motion?.revert())
 
 <style scoped>
 .site { position: relative; min-height: 100vh; }
+.continuation {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  background: var(--color-bg);
+}
+.continuation::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 65% 24% at 8% 20%, rgba(var(--violet-rgb), 0.13), transparent 75%),
+    radial-gradient(ellipse 65% 32% at 95% 48%, rgba(var(--violet-rgb), 0.08), transparent 75%);
+}
 
 /* Header */
 .header {
@@ -429,6 +447,16 @@ onBeforeUnmount(() => motion?.revert())
   filter: blur(50px);
   pointer-events: none;
 }
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 150px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(transparent, var(--color-bg));
+}
+.scroll-hint { z-index: 3; }
 .hero-content-inner { position: relative; z-index: 3; text-align: center; max-width: 920px; }
 .hero-eyebrow {
   display: inline-block;
@@ -543,10 +571,7 @@ onBeforeUnmount(() => motion?.revert())
 .about {
   position: relative; z-index: 2; overflow: hidden;
   padding: 130px 24px 140px;
-  background:
-    radial-gradient(60% 50% at 80% 10%, rgba(var(--violet-rgb),0.16), transparent 70%),
-    radial-gradient(50% 40% at 10% 90%, rgba(217,70,239,0.08), transparent 70%),
-    #050308;
+  background: transparent;
 }
 .about-outline {
   position: absolute; top: 46px; right: -10px;
@@ -557,13 +582,14 @@ onBeforeUnmount(() => motion?.revert())
   pointer-events: none; user-select: none;
 }
 .about-blob {
-  position: absolute; left: -12%; bottom: -14%;
+  position: absolute; left: -12%; bottom: 0;
   width: min(58vw, 640px); aspect-ratio: 1.15;
   background:
     radial-gradient(ellipse at 35% 35%, #d2b8ff 0%, transparent 48%),
     radial-gradient(ellipse at 55% 55%, var(--color-violet) 15%, transparent 65%),
     radial-gradient(ellipse at 40% 70%, var(--color-violet-deep) 15%, transparent 68%);
   filter: blur(28px) saturate(1.2);
+  mask-image: radial-gradient(ellipse closest-side, black 35%, transparent 100%);
   border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
   animation: blob-morph 12s ease-in-out infinite;
   pointer-events: none;
@@ -624,9 +650,7 @@ onBeforeUnmount(() => motion?.revert())
 /* Tech marquee */
 .marquee {
   position: relative; z-index: 2;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.015);
+  background: var(--color-bg);
   overflow: hidden; padding: 16px 0;
 }
 .marquee-track { display: flex; gap: 54px; width: max-content; animation: marquee-scroll 30s linear infinite; }
@@ -639,7 +663,7 @@ onBeforeUnmount(() => motion?.revert())
 @keyframes marquee-scroll { to { transform: translateX(-50%); } }
 
 /* How it works */
-.how { position: relative; z-index: 2; padding: 110px 24px 120px; background: radial-gradient(55% 40% at 50% 0%, rgba(var(--violet-rgb),0.07), transparent 70%); }
+.how { position: relative; z-index: 2; padding: 110px 24px 120px; }
 .how-inner { max-width: var(--content-width); margin: 0 auto; text-align: center; }
 .how-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; text-align: left; margin-top: 54px; }
 .step-card {
@@ -671,7 +695,7 @@ onBeforeUnmount(() => motion?.revert())
 .stat-label { font-size: 0.8rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-muted); margin: 10px 0 0; }
 
 /* Footer */
-.footer { position: relative; z-index: 2; padding: 36px 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+.footer { position: relative; z-index: 2; padding: 36px 24px; background: var(--color-bg); border-top: 1px solid rgba(255,255,255,0.06); }
 .footer-inner { max-width: var(--content-width); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
 .footer-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #fff; }
 .footer-logo { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; }
