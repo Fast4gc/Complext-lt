@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef" class="three-bg"></div>
+  <div ref="containerRef" class="three-bg" aria-hidden="true"></div>
 </template>
 
 <script setup>
@@ -10,6 +10,8 @@ const containerRef = ref(null)
 let renderer = null
 let animationId = 0
 let disposed = false
+let cleanup = () => {}
+onBeforeUnmount(() => cleanup())
 
 function makeCircleTexture() {
   const size = 64
@@ -41,7 +43,11 @@ onMounted(() => {
   const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
   camera.position.z = 50
 
-  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+  try {
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
+  } catch {
+    return
+  }
   renderer.setSize(width, height)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.setClearColor(0x000000, 0)
@@ -70,10 +76,11 @@ onMounted(() => {
 
   const points = new THREE.Points(geometry, material)
   scene.add(points)
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
 
   function animate() {
     if (disposed) return
-    animationId = requestAnimationFrame(animate)
+    if (!motion.matches) animationId = requestAnimationFrame(animate)
     const time = Date.now() * 0.0003
     const pos = geometry.attributes.position.array
     for (let i = 0; i < count; i++) {
@@ -87,6 +94,11 @@ onMounted(() => {
     renderer.render(scene, camera)
   }
   animate()
+  const onMotionChange = () => {
+    cancelAnimationFrame(animationId)
+    animate()
+  }
+  motion.addEventListener('change', onMotionChange)
 
   const onMouseMove = (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1
@@ -99,16 +111,19 @@ onMounted(() => {
     camera.aspect = w / h
     camera.updateProjectionMatrix()
     renderer.setSize(w, h)
+    if (motion.matches) renderer.render(scene, camera)
   }
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('resize', onResize)
 
-  onBeforeUnmount(() => {
+  cleanup = () => {
     disposed = true
     if (animationId) cancelAnimationFrame(animationId)
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('resize', onResize)
+    motion.removeEventListener('change', onMotionChange)
     geometry.dispose()
+    material.map?.dispose()
     material.dispose()
     if (renderer) {
       renderer.dispose()
@@ -117,7 +132,7 @@ onMounted(() => {
       }
       renderer = null
     }
-  })
+  }
 })
 </script>
 
