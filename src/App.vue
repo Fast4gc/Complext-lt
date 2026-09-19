@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import ThreeBackground from './components/ThreeBackground.vue'
+import ScrollStory from './components/ScrollStory.vue'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -86,6 +87,21 @@ onMounted(async () => {
       ease: 'power2.out',
     })
 
+    gsap.from('.about-outline', {
+      scrollTrigger: { trigger: '.about', start: 'top 72%', once: true },
+      xPercent: 10, opacity: 0, duration: 1, ease: 'power2.out',
+    })
+
+    gsap.from('.about-blob', {
+      scrollTrigger: { trigger: '.about', start: 'top 72%', once: true },
+      scale: 0.82, opacity: 0, duration: 1.2, ease: 'power2.out',
+    })
+
+    gsap.from('.about-copy > *', {
+      scrollTrigger: { trigger: '.about-copy', start: 'top 82%', once: true },
+      y: 28, opacity: 0, duration: 0.7, stagger: 0.09, ease: 'power2.out',
+    })
+
     gsap.from(footerRef.value, {
       scrollTrigger: { trigger: footerRef.value, start: 'top 96%', once: true },
       y: 24,
@@ -127,6 +143,8 @@ onBeforeUnmount(() => {
           <span>Complext</span>
         </a>
         <nav class="header-nav">
+          <a href="#story">Story</a>
+          <a href="#about">About</a>
           <a href="#features">Features</a>
           <a href="https://github.com/Fast4gc/Complext">GitHub</a>
         </nav>
@@ -194,6 +212,36 @@ onBeforeUnmount(() => {
         <div class="scroll-hint" aria-hidden="true">
           <div class="scroll-hint-line"></div>
         </div>
+      </section>
+
+      <!-- SCROLL STORY: 3D star -> animated text (pinned) -->
+      <div id="story">
+        <ScrollStory />
+      </div>
+
+      <!-- ABOUT (Image 3 style) -->
+      <section id="about" class="about">
+        <div class="about-blob" aria-hidden="true"></div>
+        <span class="about-outline" aria-hidden="true">ABOUT</span>
+        <div class="about-inner">
+          <div class="about-copy">
+            <p class="about-eyebrow">Who we are</p>
+            <h2 class="about-title">Providing comprehensive automation tailored to the unique needs of our clients.</h2>
+            <p class="about-text">
+              Complext is a studio of engineers and designers obsessed with flow.
+              We blend human intuition with algorithmic precision to ship fast,
+              reliable experiences — from backend pipelines to interfaces.
+            </p>
+            <a href="keys" class="btn-cta about-cta">
+              Read more
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="8" x2="13" y2="8"/>
+                <polyline points="9,4 13,8 9,12"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="about-ticks" aria-hidden="true"><span>01</span><i></i><i></i><i></i></div>
       </section>
 
       <!-- FEATURES -->
@@ -365,6 +413,51 @@ onBeforeUnmount(() => {
   0%,100% { opacity: 0.3; } 50% { opacity: 0.7; }
 }
 
+/* About (Image 3 style) */
+.about {
+  position: relative; z-index: 2; overflow: hidden;
+  padding: 130px 24px 140px;
+  background:
+    radial-gradient(60% 50% at 80% 10%, rgba(124,58,237,0.16), transparent 70%),
+    radial-gradient(50% 40% at 10% 90%, rgba(217,70,239,0.08), transparent 70%),
+    #050308;
+}
+.about-outline {
+  position: absolute; top: 46px; right: -10px;
+  font-weight: 900; letter-spacing: 0.02em;
+  font-size: clamp(4rem, 15vw, 12rem); line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.16);
+  pointer-events: none; user-select: none;
+}
+.about-blob {
+  position: absolute; left: -12%; bottom: -14%;
+  width: min(58vw, 640px); aspect-ratio: 1.15;
+  background:
+    radial-gradient(38% 42% at 30% 35%, rgba(255,255,255,0.75), transparent 70%),
+    radial-gradient(55% 60% at 55% 45%, rgba(168,85,247,0.9), transparent 72%),
+    radial-gradient(45% 55% at 70% 60%, rgba(59,130,246,0.85), transparent 70%),
+    radial-gradient(60% 65% at 45% 70%, rgba(217,70,239,0.75), transparent 72%),
+    radial-gradient(35% 30% at 75% 80%, rgba(251,146,60,0.55), transparent 70%);
+  filter: blur(28px) saturate(1.2);
+  border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
+  animation: blob-morph 12s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes blob-morph {
+  0%,100% { border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%; transform: rotate(0deg) scale(1); }
+  50% { border-radius: 58% 42% 45% 55% / 42% 58% 48% 52%; transform: rotate(8deg) scale(1.05); }
+}
+.about-inner { position: relative; max-width: 1100px; margin: 0 auto; display: flex; justify-content: flex-end; }
+.about-copy { max-width: 470px; text-align: left; padding-top: 70px; }
+.about-eyebrow { font-size: 0.72rem; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin: 0 0 18px; }
+.about-title { font-size: clamp(1.3rem, 2.4vw, 1.75rem); font-weight: 700; line-height: 1.35; color: #fff; margin: 0 0 18px; letter-spacing: -0.01em; }
+.about-text { font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,0.42); margin: 0 0 32px; }
+.about-cta { font-size: 0.85rem; padding: 12px 24px; }
+.about-ticks { position: absolute; bottom: 30px; right: 36px; display: flex; align-items: center; gap: 12px; font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+.about-ticks i { display: block; width: 26px; height: 1px; background: rgba(255,255,255,0.25); }
+.about-ticks i:first-of-type { background: rgba(255,255,255,0.7); }
+
 /* Features */
 .features { position: relative; z-index: 2; padding: 90px 24px 120px; }
 .features-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
@@ -407,6 +500,10 @@ onBeforeUnmount(() => {
   .hero-visual { height: 320px; }
   .hero-side { display: none; }
   .hero-centerpiece { width: 120px; height: 120px; }
+  .about-inner { justify-content: flex-start; }
+  .about-copy { max-width: 100%; padding-top: 120px; }
+  .about-blob { left: -30%; width: 110vw; opacity: 0.7; }
+  .about-ticks { display: none; }
 }
 @media (max-width: 640px) {
   .footer-inner { flex-direction: column; gap: 14px; }
