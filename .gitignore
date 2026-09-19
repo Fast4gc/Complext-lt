@@ -30,3 +30,4 @@ dist-ssr
 
 # Profiles and sensitive configs
 .openclaude-profile.json
+.opencode/skills/paleta-gradientes/SKILL.md

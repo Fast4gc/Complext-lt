@@ -88,7 +88,7 @@ onMounted(() => {
     const mm = gsap.matchMedia()
 
     // Desktop / large: pinned scrubbed sequence
-    mm.add('(min-width: 769px)', () => {
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
@@ -156,14 +156,14 @@ onBeforeUnmount(() => {
 
 .act { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .act--dark { background: #000; z-index: 1; }
-.act--cream { background: #f3efe7; z-index: 2; opacity: 0; }
+.act--cream { background: var(--color-cream); z-index: 2; opacity: 0; }
 
 .act-kicker {
   position: absolute; top: 96px;
   font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase;
   color: rgba(255,255,255,0.35); margin: 0;
 }
-.act-kicker--dark { color: rgba(20,16,12,0.4); }
+.act-kicker--dark { color: #71695f; }
 .act-hint { margin-top: 42px; font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
 
 .star { width: min(46vh, 380px); height: min(46vh, 380px); filter: drop-shadow(0 0 42px rgba(124,58,237,0.45)); }
@@ -173,13 +173,13 @@ onBeforeUnmount(() => {
 .void-word {
   margin: 0;
   font-weight: 900;
-  font-size: clamp(3rem, 13vw, 11rem);
+  font-size: clamp(2.6rem, 12.8vw, 11rem);
   letter-spacing: -0.05em;
   line-height: 1;
   color: transparent;
   background-image: linear-gradient(to bottom,
     #171310 0%, #171310 36%,
-    #6d28d9 45%, #a855f7 52%,
+    var(--color-violet) 45%, var(--color-accent) 52%,
     #171310 60%, #171310 82%, rgba(23,19,16,0.15) 100%);
   background-size: 100% 220%;
   background-position: 50% 0%;
@@ -191,12 +191,12 @@ onBeforeUnmount(() => {
 .void-blob { position: absolute; bottom: 0; filter: blur(38px); }
 .void-blob--a {
   left: 4%; width: 44%; height: 120%;
-  background: radial-gradient(ellipse at 40% 60%, #0c0a08 30%, #4c1d95 62%, transparent 75%);
+  background: radial-gradient(ellipse at 40% 60%, #0c0a08 30%, var(--color-violet-deep) 62%, transparent 75%);
   border-radius: 50% 50% 0 0;
 }
 .void-blob--b {
   right: 4%; width: 44%; height: 120%;
-  background: radial-gradient(ellipse at 60% 60%, #0c0a08 30%, #6d28d9 62%, transparent 75%);
+  background: radial-gradient(ellipse at 60% 60%, #0c0a08 30%, var(--color-violet) 62%, transparent 75%);
   border-radius: 50% 50% 0 0;
 }
 
@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
 .tick.is-active { opacity: 1; color: #fff; }
 .tick-line { width: 28px; height: 1px; background: rgba(255,255,255,0.25); }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
   .scrollstory-pin { height: auto; }
   .act { position: relative; min-height: 80vh; }
   .act--cream { opacity: 1; }
